@@ -144,9 +144,14 @@ class _TopBar extends StatelessWidget {
                     ),
                   ),
                   if (!narrow) ...[
-                    Icon(Icons.circle, size: 8, color: state.store.isShared ? p.cge : const Color(0xFFE0B400)),
+                    Icon(Icons.circle,
+                        size: 8,
+                        color: state.offline
+                            ? const Color(0xFFE5484D)
+                            : (state.store.isShared ? p.cge : const Color(0xFFE0B400))),
                     const SizedBox(width: 6),
-                    Text(state.store.description, style: TextStyle(fontSize: 12, color: p.muted)),
+                    Text(state.offline ? 'Connexion impossible à la base' : state.store.description,
+                        style: TextStyle(fontSize: 12, color: p.muted)),
                     const SizedBox(width: 12),
                   ],
                   PopupMenuButton<String>(

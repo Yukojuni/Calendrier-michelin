@@ -1,14 +1,15 @@
 /// Stockage des congés posés.
 ///
-/// [AbsenceStore] est l'interface utilisée par l'app. Aujourd'hui seule
-/// [LocalAbsenceStore] existe (données sur l'appareil). Un stockage partagé
-/// (Firebase, API…) pourra la remplacer sans toucher à l'interface.
+/// [AbsenceStore] est l'interface utilisée par l'app :
+/// - [SupabaseAbsenceStore] : partagé avec toute l'équipe, en temps réel ;
+/// - [LocalAbsenceStore] : sur l'appareil, utilisé quand Supabase n'est pas configuré.
 library;
 
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'models.dart';
 
@@ -74,4 +75,49 @@ class LocalAbsenceStore implements AbsenceStore {
     await _prefs.setString(_key, jsonEncode(_data.values.map((a) => a.toJson()).toList()));
     _changes.add(Map.of(_data));
   }
+}
+
+/// Congés partagés avec toute l'équipe, dans la table `absences` de Supabase
+/// (voir supabase/schema.sql). Les changements des autres arrivent en temps réel.
+class SupabaseAbsenceStore implements AbsenceStore {
+  SupabaseAbsenceStore(this._db);
+
+  static const _table = 'absences';
+  final SupabaseClient _db;
+
+  @override
+  String get description => "Synchronisé avec l'équipe";
+
+  @override
+  bool get isShared => true;
+
+  @override
+  Stream<Map<String, Absence>> watch() => _db.from(_table).stream(primaryKey: ['id']).map((rows) => {
+        for (final a in rows.map(fromRow).nonNulls) a.id: a,
+      });
+
+  @override
+  Future<void> put(Absence absence) => _db.from(_table).upsert(toRow(absence));
+
+  @override
+  Future<void> remove(String id) => _db.from(_table).delete().eq('id', id);
+
+  /// Ligne de la table → [Absence].
+  static Absence? fromRow(Map<String, dynamic> row) => Absence.fromJson({
+        'date': (row['date'] as String?)?.substring(0, 10),
+        'person': row['person'],
+        'kind': row['kind'],
+        'note': row['note'],
+        'updatedAt': row['updated_at'],
+      });
+
+  /// [Absence] → ligne de la table.
+  static Map<String, Object?> toRow(Absence a) => {
+        'id': a.id,
+        'date': a.date,
+        'person': a.person,
+        'kind': a.kind.name,
+        'note': a.note,
+        'updated_at': a.updatedAt.toUtc().toIso8601String(),
+      };
 }

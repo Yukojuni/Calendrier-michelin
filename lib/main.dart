@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_state.dart';
 import 'store.dart';
@@ -15,8 +16,20 @@ Future<void> main() async {
   Intl.defaultLocale = 'fr_FR';
   await initializeDateFormatting('fr_FR');
   final prefs = await SharedPreferences.getInstance();
-  final state = AppState(LocalAbsenceStore(prefs), prefs);
+  final state = AppState(await _openStore(prefs), prefs);
   runApp(GuideApp(state: state));
+}
+
+/// Configuration Supabase, passée à la compilation :
+/// `--dart-define-from-file=supabase.json` (voir supabase.example.json).
+const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const _supabaseKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+
+/// Stockage partagé Supabase si configuré, sinon stockage sur l'appareil.
+Future<AbsenceStore> _openStore(SharedPreferences prefs) async {
+  if (_supabaseUrl.isEmpty || _supabaseKey.isEmpty) return LocalAbsenceStore(prefs);
+  await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseKey);
+  return SupabaseAbsenceStore(Supabase.instance.client);
 }
 
 class GuideApp extends StatelessWidget {

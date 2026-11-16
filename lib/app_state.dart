@@ -20,6 +20,10 @@ class AppState extends ChangeNotifier {
         : (today.compareTo(kDates.first) < 0 ? kMonths.first : kMonths.last);
     _sub = store.watch().listen((data) {
       overrides = data;
+      offline = false;
+      notifyListeners();
+    }, onError: (Object _) {
+      offline = true;
       notifyListeners();
     });
   }
@@ -34,6 +38,9 @@ class AppState extends ChangeNotifier {
   late String month;
   Map<String, Absence> overrides = {};
   final Set<String> selection = {};
+
+  /// Vrai quand le stockage partagé ne répond pas (pas de réseau…).
+  bool offline = false;
 
   /// Incrémenté pour demander à l'app de demander un recentrage sur aujourd'hui.
   int recenter = 0;

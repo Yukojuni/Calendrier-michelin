@@ -43,6 +43,16 @@ void main() {
     expect(effectiveCode('2026-11-16', lucas, state.overrides), 'E');
   });
 
+  test('conversion vers et depuis une ligne Supabase', () {
+    final a = Absence(date: '2027-03-01', person: 'Jenny', kind: AbsenceKind.tt, note: 'Dentiste', updatedAt: DateTime.utc(2026, 11, 16));
+    final row = SupabaseAbsenceStore.toRow(a);
+    expect(row['id'], '2027-03-01_Jenny');
+    expect(row['kind'], 'tt');
+    final back = SupabaseAbsenceStore.fromRow({...row, 'updated_at': '2026-11-16T00:00:00+00:00'})!;
+    expect([back.date, back.person, back.kind, back.note], ['2027-03-01', 'Jenny', AbsenceKind.tt, 'Dentiste']);
+    expect(SupabaseAbsenceStore.fromRow({'id': 'x', 'kind': 'inconnu'}), isNull);
+  });
+
   test('les jours consécutifs sont regroupés', () {
     Absence a(String d) => Absence(date: d, person: 'Lucas', kind: AbsenceKind.conge, updatedAt: DateTime(2026));
     final g = groupAbsences([a('2026-11-19'), a('2026-11-20'), a('2026-11-23'), a('2026-12-01')]);
