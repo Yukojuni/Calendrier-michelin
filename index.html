@@ -287,7 +287,7 @@ const baseCode=(d,i)=>(DAYS[d]||"")[i]||"-";
 const ov=(d,i)=>overrides.get(docId(d,P[i].name));
 function code(d,i){const o=ov(d,i),b=baseCode(d,i);return o&&!LOCKED.has(b)?(KIND_CODE[o.kind]||b):b}
 /* photos de profil : fichiers dans photos/ (prénom en minuscules sans accent). Sans photo, on affiche l'initiale. */
-const PHOTOS={Tom:"photos/tom.jpg",Quentin:"photos/quentin.jpg"};
+const PHOTOS={Tom:"photos/tom.jpg",Quentin:"photos/quentin.jpg",Romain:"photos/romain.jpg"};
 const avatar=(i,cls="")=>{const p=P[i],src=PHOTOS[p.name];
   return `<span class="av ${cls}" style="--h:${p.hue}" title="${esc(p.name)}">${src?`<img src="${src}" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('${esc(p.name.slice(0,1).toUpperCase())}'))">`:esc(p.name.slice(0,1).toUpperCase())}</span>`};
 
