@@ -37,13 +37,15 @@ h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:b
 .logo{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
 .logo svg{width:34px;height:34px;flex:none}
 .logo h1{font-size:19px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.logo h1 span{background:linear-gradient(transparent 58%,var(--accent) 58% 90%,transparent 90%)}
+.logo h1{line-height:1.25;padding-bottom:6px;margin-bottom:-6px}
+.logo h1 span{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:4px;text-underline-offset:5px;text-decoration-skip-ink:none}
 .sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--line)}
 .sync.on i{background:var(--s-cge)}.sync.local i{background:#E0B400}
 .whobtn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px 4px 4px;font-weight:600;white-space:nowrap}
 .whobtn:hover{background:var(--sunk)}
-@media (max-width:560px){.sync span{display:none}.logo h1{font-size:17px}}
+@media (max-width:560px){.sync{display:none}.logo h1{font-size:17px}.logo{gap:8px}.logo svg{width:30px;height:30px}.top .wrap{gap:8px}.whobtn{padding:3px 10px 3px 3px}}
+@media (max-width:380px){.logo h1{font-size:15.5px}}
 
 .av{--h:220;width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;font-weight:700;flex:none;
   background:hsl(var(--h) 70% 88%);color:hsl(var(--h) 55% 28%)}
