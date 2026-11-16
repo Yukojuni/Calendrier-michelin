@@ -5,7 +5,8 @@ library;
 enum AbsenceKind {
   conge('Congé', 'K'),
   tt('Télétravail', 't'),
-  bureau('Au bureau', 'E');
+  bureau('Au bureau', 'E'),
+  ecole('École', 'S');
 
   const AbsenceKind(this.label, this.code);
 

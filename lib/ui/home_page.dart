@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           s.meIndex < 0
                               ? 'Choisis ton nom en haut à droite pour pouvoir poser des absences.'
-                              : 'Touche tes jours (ou glisse à la souris pour en prendre plusieurs), puis choisis Congé ou Télétravail en bas.',
+                              : 'Touche n\'importe lequel de tes jours (ou glisse à la souris pour en prendre plusieurs), puis choisis son statut en bas.',
                           style: TextStyle(color: p.muted, fontSize: 13),
                         ),
                         const SizedBox(height: 12),
@@ -352,6 +352,7 @@ class _ActionBarState extends State<_ActionBar> {
       btn('Poser en congé', AbsenceKind.conge, primary: true),
       btn('Télétravail', AbsenceKind.tt, dot: p.tt),
       btn('Bureau', AbsenceKind.bureau, dot: p.ent),
+      btn('École', AbsenceKind.ecole, dot: p.eco),
       btn('Rétablir', null),
     ]);
     final close = IconButton(
@@ -401,14 +402,14 @@ class _MyAbsences extends StatelessWidget {
     Widget empty(String t) => Text(t, style: TextStyle(color: p.muted));
     return Panel(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Mes absences', style: display(17, color: p.ink)),
+        Text('Mes modifications', style: display(17, color: p.ink)),
         const SizedBox(height: 4),
-        Text("Congés et télétravail posés dans l'app.", style: TextStyle(color: p.muted, fontSize: 13)),
+        Text("Les jours que tu as changés par rapport au planning d'origine.", style: TextStyle(color: p.muted, fontSize: 13)),
         const SizedBox(height: 14),
         if (state.meIndex < 0)
-          empty('Choisis ton nom pour voir tes absences.')
+          empty('Choisis ton nom pour voir tes modifications.')
         else if (groups.isEmpty)
-          empty("Rien de posé pour l'instant. Sélectionne des jours dans ta ligne du planning.")
+          empty("Rien de changé pour l'instant. Sélectionne des jours dans ta ligne du planning.")
         else
           for (var g = 0; g < groups.length; g++)
             Container(
@@ -436,9 +437,9 @@ class _MyAbsences extends StatelessWidget {
                 TextButton(
                   onPressed: () async {
                     await state.removeAll(groups[g]);
-                    onToast('Absence retirée');
+                    onToast("Retour au planning d'origine");
                   },
-                  child: const Text('Retirer'),
+                  child: const Text('Annuler'),
                 ),
               ]),
             ),
@@ -506,7 +507,7 @@ class _PeriodFormState extends State<_PeriodForm> {
     if (r == null) return setState(() => _msg = 'Choisis une période.');
     final a = isoDate(r.start), b = isoDate(r.end);
     final targets = kDates.where((d) => d.compareTo(a) >= 0 && d.compareTo(b) <= 0 && s.canSelect(d)).toList();
-    if (targets.isEmpty) return setState(() => _msg = 'Aucun jour en entreprise sur cette période.');
+    if (targets.isEmpty) return setState(() => _msg = "Aucun jour de ton planning sur cette période.");
     setState(() {
       _busy = true;
       _msg = 'Enregistrement…';
@@ -514,7 +515,7 @@ class _PeriodFormState extends State<_PeriodForm> {
     try {
       final n = await s.apply(targets, _kind, note: _note.text);
       _note.clear();
-      setState(() => _msg = '$n jour${n > 1 ? 's' : ''} posé${n > 1 ? 's' : ''}.');
+      setState(() => _msg = '$n jour${n > 1 ? 's' : ''} en ${_kind.label.toLowerCase()}.');
       s.goToMonth(targets.first.substring(0, 7));
     } catch (_) {
       setState(() => _msg = "L'enregistrement a échoué, réessaie dans un instant.");
@@ -529,20 +530,25 @@ class _PeriodFormState extends State<_PeriodForm> {
     final f = DateFormat('d MMM y');
     return Panel(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Poser une longue période', style: display(17, color: p.ink)),
+        Text('Changer une longue période', style: display(17, color: p.ink)),
         const SizedBox(height: 4),
-        Text("Pratique quand ça déborde sur plusieurs mois. L'école, les fériés et les week-ends sont ignorés.",
+        Text('Pratique quand ça déborde sur plusieurs mois. Tous les jours ouvrés de la période prennent le statut choisi.',
             style: TextStyle(color: p.muted, fontSize: 13)),
         const SizedBox(height: 14),
-        SegmentedButton<AbsenceKind>(
-          segments: [
-            ButtonSegment(value: AbsenceKind.conge, label: _SegLabel('Congé', p.cge)),
-            ButtonSegment(value: AbsenceKind.tt, label: _SegLabel('Télétravail', p.tt)),
-          ],
-          selected: {_kind},
-          showSelectedIcon: false,
-          onSelectionChanged: (v) => setState(() => _kind = v.first),
-        ),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          for (final (kind, color) in [
+            (AbsenceKind.conge, p.cge),
+            (AbsenceKind.tt, p.tt),
+            (AbsenceKind.ecole, p.eco),
+            (AbsenceKind.bureau, p.ent),
+          ])
+            ChoiceChip(
+              label: _SegLabel(kind == AbsenceKind.bureau ? 'Bureau' : kind.label, color),
+              selected: _kind == kind,
+              showCheckmark: false,
+              onSelected: (_) => setState(() => _kind = kind),
+            ),
+        ]),
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: _pickRange,
@@ -576,7 +582,7 @@ class _PeriodFormState extends State<_PeriodForm> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          child: const Text('Poser la période', style: TextStyle(fontWeight: FontWeight.w600)),
+          child: const Text('Appliquer à la période', style: TextStyle(fontWeight: FontWeight.w600)),
         ),
         if (_msg.isNotEmpty) ...[
           const SizedBox(height: 8),

@@ -5,12 +5,17 @@ create table if not exists public.absences (
   id          text primary key,                 -- AAAA-MM-JJ_Prenom
   date        date not null,
   person      text not null,
-  kind        text not null check (kind in ('conge', 'tt', 'bureau')),
+  kind        text not null,
   note        text not null default '' check (char_length(note) <= 80),
   updated_at  timestamptz not null default now()
 );
 
 create index if not exists absences_person_date on public.absences (person, date);
+
+-- Statuts possibles (relancer ce fichier met à jour une table déjà créée).
+alter table public.absences drop constraint if exists absences_kind_check;
+alter table public.absences add constraint absences_kind_check
+  check (kind in ('conge', 'tt', 'bureau', 'ecole'));
 
 -- Sécurité : l'app n'a pas encore de comptes, la clé publique peut donc lire et écrire.
 -- À resserrer quand on ajoutera la connexion (chacun ne modifiera que ses propres lignes).

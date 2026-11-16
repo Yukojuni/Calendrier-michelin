@@ -38,8 +38,8 @@ final List<String> kDates = kDays.keys.toList()..sort();
 /// Les mois couverts (AAAA-MM), dans l'ordre.
 final List<String> kMonths = kDates.map((d) => d.substring(0, 7)).toSet().toList();
 
-/// Statuts sur lesquels on ne peut rien poser.
-const Set<String> kLocked = {'S', 'X', 'C', 'F', '-'};
+/// Statuts sur lesquels on ne peut rien poser (la personne n'est pas dans l'équipe ce jour-là).
+const Set<String> kLocked = {'-'};
 const Set<String> kAtWork = {'E'};
 const Set<String> kAtSchool = {'S', 'X', 'C'};
 const Set<String> kAway = {'K', 't', 'T'};
@@ -81,7 +81,8 @@ String effectiveCode(String date, int person, Map<String, Absence> overrides) {
 bool isNatural(AbsenceKind kind, String base) =>
     (kind == AbsenceKind.bureau && kAtWork.contains(base)) ||
     (kind == AbsenceKind.conge && base == 'K') ||
-    (kind == AbsenceKind.tt && base == 't');
+    (kind == AbsenceKind.tt && base == 't') ||
+    (kind == AbsenceKind.ecole && kAtSchool.contains(base));
 
 /// Premier jour du planning à partir d'aujourd'hui (ou le dernier si tout est passé).
 String referenceDay(String today) => kDates.firstWhere((d) => d.compareTo(today) >= 0, orElse: () => kDates.last);

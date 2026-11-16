@@ -122,12 +122,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  /// Absences posées par moi (hors simple retour au bureau), triées.
+  /// Journées que j'ai modifiées par rapport au planning d'origine, triées.
   List<Absence> get myAbsences {
     final i = meIndex;
     if (i < 0) return const [];
     return overrides.values
-        .where((a) => a.person == me && a.kind != AbsenceKind.bureau && !kLocked.contains(baseCode(a.date, i)))
+        .where((a) => a.person == me && !kLocked.contains(baseCode(a.date, i)))
         .toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }

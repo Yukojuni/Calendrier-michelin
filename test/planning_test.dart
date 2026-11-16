@@ -12,9 +12,11 @@ void main() {
     expect(kMonths.last, '2028-08');
   });
 
-  test('le 11 novembre est férié et verrouillé', () {
+  test('tous les jours sont modifiables sauf hors équipe', () {
     expect(baseCode('2026-11-11', 0), 'F');
-    expect(isEditable('2026-11-11', 0), isFalse);
+    expect(isEditable('2026-11-11', 0), isTrue);
+    final q = kPeople.indexWhere((p) => p.name == 'Quentin');
+    expect(isEditable('2027-02-01', q), isFalse);
   });
 
   test('Quentin finit le 29 janvier 2027', () {
@@ -29,15 +31,23 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     state.setMe('Lucas');
     final lucas = state.meIndex;
-    // 16/11/2026 : Lucas est en entreprise ; 02/11 il est à l'école (ignoré).
+    // 16/11/2026 : Lucas est en entreprise ; 02/11 il est à l'école : les deux changent.
     final n = await state.apply(['2026-11-16', '2026-11-02'], AbsenceKind.conge, note: 'Ski');
     await Future<void>.delayed(Duration.zero);
-    expect(n, 1);
+    expect(n, 2);
     expect(effectiveCode('2026-11-16', lucas, state.overrides), 'K');
-    expect(state.myAbsences.single.note, 'Ski');
+    expect(effectiveCode('2026-11-02', lucas, state.overrides), 'K');
+    expect(state.myAbsences.first.note, 'Ski');
+    // Un jour d'entreprise passé en école, puis remis en école : rien à enregistrer.
+    await state.apply(['2026-11-17'], AbsenceKind.ecole);
+    await Future<void>.delayed(Duration.zero);
+    expect(effectiveCode('2026-11-17', lucas, state.overrides), 'S');
+    await state.apply(['2026-11-02'], AbsenceKind.ecole);
+    await Future<void>.delayed(Duration.zero);
+    expect(effectiveCode('2026-11-02', lucas, state.overrides), 'S');
     // Les données survivent à un redémarrage.
     final reloaded = LocalAbsenceStore(prefs);
-    expect((await reloaded.watch().first).length, 1);
+    expect((await reloaded.watch().first).length, 2);
     await state.apply(['2026-11-16'], null);
     await Future<void>.delayed(Duration.zero);
     expect(effectiveCode('2026-11-16', lucas, state.overrides), 'E');
