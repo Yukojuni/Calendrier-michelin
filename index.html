@@ -51,6 +51,8 @@ h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:b
   background:hsl(var(--h) 70% 88%);color:hsl(var(--h) 55% 28%)}
 :root[data-theme="dark"] .av{background:hsl(var(--h) 35% 30%);color:hsl(var(--h) 80% 88%)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .av{background:hsl(var(--h) 35% 30%);color:hsl(var(--h) 80% 88%)}}
+.av{overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
 .av.lg{width:44px;height:44px;font-size:16px}
 .av.empty{background:var(--sunk);color:var(--muted)}
 
@@ -77,14 +79,10 @@ h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:b
 .mehead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .mehead h3{font-size:18px;font-weight:700}
 .mehead .sub{color:var(--muted);font-size:12.5px}
-.stars{margin-left:auto;display:flex;gap:2px;color:#E0B400}
-.stars svg{width:18px;height:18px}
 .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .kpi{background:var(--sunk);border-radius:12px;padding:10px 12px}
 .kpi b{display:block;font-family:var(--f-display);font-size:24px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
 .kpi span{font-size:12px;color:var(--muted)}
-.verdict{font-size:12.5px;color:var(--muted);margin:10px 0 0}
-.verdict b{color:var(--ink)}
 .welcome{display:flex;flex-direction:column;gap:12px}
 .welcome p{margin:0;color:var(--muted)}
 .chooser{display:flex;flex-wrap:wrap;gap:6px}
@@ -288,8 +286,10 @@ const meIdx=()=>P.findIndex(p=>p.name===me);
 const baseCode=(d,i)=>(DAYS[d]||"")[i]||"-";
 const ov=(d,i)=>overrides.get(docId(d,P[i].name));
 function code(d,i){const o=ov(d,i),b=baseCode(d,i);return o&&!LOCKED.has(b)?(KIND_CODE[o.kind]||b):b}
-const avatar=(i,cls="")=>`<span class="av ${cls}" style="--h:${P[i].hue}" title="${esc(P[i].name)}">${esc(P[i].name.slice(0,1).toUpperCase())}</span>`;
-const star=f=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" fill="${f?"currentColor":"none"}" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+/* photos de profil : fichiers dans photos/ (prénom en minuscules sans accent). Sans photo, on affiche l'initiale. */
+const PHOTOS={Tom:"photos/tom.jpg"};
+const avatar=(i,cls="")=>{const p=P[i],src=PHOTOS[p.name];
+  return `<span class="av ${cls}" style="--h:${p.hue}" title="${esc(p.name)}">${src?`<img src="${src}" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('${esc(p.name.slice(0,1).toUpperCase())}'))">`:esc(p.name.slice(0,1).toUpperCase())}</span>`};
 
 /* ---------- stockage ---------- */
 const store={mode:"loading",col:null,
@@ -356,11 +356,8 @@ function renderMe(){
     el.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>setMe(b.dataset.n));return}
   const cg=DATES.filter(d=>code(d,i)==="K").length, up=DATES.filter(d=>d>=todayISO&&code(d,i)==="K").length;
   const tt=DATES.filter(d=>{const c=code(d,i);return c==="t"||c==="T"}).length;
-  const n=cg>=10?3:cg>=5?2:cg>=1?1:0;
-  const v=["pas encore d'étoile, pense à souffler","<b>une étoile</b>, une très bonne pause","<b>deux étoiles</b>, mérite un détour","<b>trois étoiles</b>, vaut le voyage"][n];
-  el.innerHTML=`<div class="mehead">${avatar(i,"lg")}<div><h3>${esc(P[i].name)}</h3><div class="sub">${esc(P[i].school)} · alternance</div></div><div class="stars" title="Note du Guide">${[0,1,2].map(k=>star(k<n)).join("")}</div></div>
-    <div class="kpis"><div class="kpi"><b>${cg}</b><span>jours de congé</span></div><div class="kpi"><b>${up}</b><span>à venir</span></div><div class="kpi"><b>${tt}</b><span>télétravail</span></div></div>
-    <p class="verdict">Note du Guide : ${v}</p>`;
+  el.innerHTML=`<div class="mehead">${avatar(i,"lg")}<div><h3>${esc(P[i].name)}</h3><div class="sub">${esc(P[i].school)} · alternance</div></div></div>
+    <div class="kpis"><div class="kpi"><b>${cg}</b><span>jours de congé</span></div><div class="kpi"><b>${up}</b><span>à venir</span></div><div class="kpi"><b>${tt}</b><span>télétravail</span></div></div>`;
 }
 
 function renderGrid(){
