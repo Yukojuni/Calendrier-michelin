@@ -1,8 +1,8 @@
 """Convertit le JSON extrait du .docx en données compactes pour index.html."""
 import json, sys
 CODES = {"Entreprise":"E","École":"S","École : Examen":"X","École : Cours":"C","Férié":"F",
-         "TT/congés":"T","Congé":"K","TT":"t","Comité fin d'année":"M",
-         "À confirmer · exam ou entreprise":"Q","—":"-"}
+         "TT/congés":"T","Congé":"K","TT":"t","Comité fin d'année":"E",
+         "À confirmer · exam ou entreprise":"E","—":"-"}
 d = json.load(open(sys.argv[1]))
 people = d["people"]
 days = {k: "".join(CODES[row.get(p, "—")] for p in people) for k, row in sorted(d["days"].items())}
