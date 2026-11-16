@@ -8,7 +8,7 @@
   --bg:#F4F6FA; --surface:#FFFFFF; --sunk:#EEF1F7; --ink:#101A33; --muted:#66708A; --line:#E3E7EF;
   --accent:#FCE500; --accent-ink:#101A33; --focus:#27509B;
   --s-ent:#C9D8F2; --s-eco:#F7C66B; --s-cge:#2FB67C; --s-tt:#A996F2; --s-fer:#D9DDE5; --s-com:#F29BB8; --s-tbc:#FFE97A;
-  --me-row:#FFFBD6; --sel:#101A33;
+  --me-row:#FFFBD6; --sel:#101A33; --today-col:rgba(39,80,155,.08);
   --shadow:0 1px 2px rgba(16,26,51,.06),0 8px 24px rgba(16,26,51,.06);
   --f-display:"Bricolage Grotesque","Arial Rounded MT Bold",system-ui,sans-serif;
   --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -16,11 +16,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0B1020; --surface:#141A2E; --sunk:#1B2238; --ink:#E8ECF6; --muted:#8F99B3; --line:#252D46; --focus:#FCE500;
   --s-ent:#2C4370; --s-eco:#B98A2E; --s-cge:#2FB67C; --s-tt:#7D68D6; --s-fer:#323A52; --s-com:#B5607F; --s-tbc:#A8962E;
-  --me-row:#2A2710; --sel:#FCE500; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}}
+  --me-row:#2A2710; --sel:#FCE500; --today-col:rgba(252,229,0,.07); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0B1020; --surface:#141A2E; --sunk:#1B2238; --ink:#E8ECF6; --muted:#8F99B3; --line:#252D46; --focus:#FCE500;
   --s-ent:#2C4370; --s-eco:#B98A2E; --s-cge:#2FB67C; --s-tt:#7D68D6; --s-fer:#323A52; --s-com:#B5607F; --s-tbc:#A8962E;
-  --me-row:#2A2710; --sel:#FCE500; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}
+  --me-row:#2A2710; --sel:#FCE500; --today-col:rgba(252,229,0,.07); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
@@ -36,7 +36,7 @@ h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:b
 .top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px;position:relative}
 .logo{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
 .logo svg{width:34px;height:34px;flex:none}
-.logo h1{font-size:19px;font-weight:800;white-space:nowrap}
+.logo h1{font-size:19px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .logo h1 span{background:linear-gradient(transparent 58%,var(--accent) 58% 90%,transparent 90%)}
 .sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--line)}
@@ -112,6 +112,10 @@ thead th.d{width:34px;min-width:34px;text-align:center;text-transform:uppercase}
 thead th.d .n{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-top:1px}
 thead th.d.today .n{background:var(--ink);color:var(--surface);border-radius:7px;width:24px;height:22px;line-height:22px;margin:1px auto 0}
 .gap{width:8px;min-width:8px}
+.tc{background:var(--today-col)}
+tbody tr.me td.tc{background:var(--me-row);box-shadow:inset 0 0 0 999px var(--today-col)}
+thead th.tc{border-radius:10px 10px 0 0}
+tfoot td.tc{border-radius:0 0 10px 10px}
 tbody tr.me td.gap{background:var(--surface)}
 .person{display:flex;align-items:center;gap:10px;height:44px}
 .person .nm{font-weight:600;font-size:13.5px;line-height:1.15;display:block}
@@ -363,7 +367,7 @@ function renderGrid(){
   const rows=P.map((p,i)=>i).filter(i=>days.some(d=>baseCode(d,i)!=="-")).sort((a,b)=>(b===mi)-(a===mi));
   let prev=null;const wk=days.map(d=>{const w=D(d).getDay();const r=prev!==null&&w<=prev;prev=w;return r});
   let h=`<table><thead><tr><th class="namecol"><span class="eyebrow">Équipe</span></th>`;
-  days.forEach((d,k)=>{h+=`${wk[k]?'<th class="gap"></th>':''}<th class="d${d===todayISO?" today":""}">${esc(fmt(d,{weekday:"narrow"}))}<span class="n">${D(d).getDate()}</span></th>`});
+  days.forEach((d,k)=>{h+=`${wk[k]?'<th class="gap"></th>':''}<th class="d${d===todayISO?" today tc":""}">${esc(fmt(d,{weekday:"narrow"}))}<span class="n">${D(d).getDate()}</span></th>`});
   h+=`</tr></thead><tbody>`;
   rows.forEach(i=>{
     const mine=i===mi;
@@ -372,22 +376,36 @@ function renderGrid(){
       const c=code(d,i),o=ov(d,i),b=baseCode(d,i),edit=mine&&!LOCKED.has(b);
       const cls=`cell s-${c==="-"?"--":c}${o&&!LOCKED.has(b)?" posed":""}${mine&&selection.has(d)?" sel":""}`;
       const lab=`${P[i].name}, ${fmtDay(d)} : ${LABEL[c]}${o&&o.note?" · "+o.note:""}`;
-      h+=`${wk[k]?'<td class="gap"></td>':''}<td class="c">`+(edit?`<button type="button" class="${cls}" data-d="${d}" aria-pressed="${selection.has(d)}" aria-label="${esc(lab)}"></button>`:`<span class="${cls}" role="img" aria-label="${esc(lab)}"></span>`)+`</td>`;
+      h+=`${wk[k]?'<td class="gap"></td>':''}<td class="c${d===todayISO?" tc":""}">`+(edit?`<button type="button" class="${cls}" data-d="${d}" aria-pressed="${selection.has(d)}" aria-label="${esc(lab)}"></button>`:`<span class="${cls}" role="img" aria-label="${esc(lab)}"></span>`)+`</td>`;
     });
     h+=`</tr>`;
   });
   h+=`</tbody><tfoot><tr><td class="namecol">Au bureau</td>`;
   days.forEach((d,k)=>{let w=0,t=0,f=false;rows.forEach(i=>{const c=code(d,i);if(baseCode(d,i)==="-")return;t++;if(c==="F")f=true;if(AT_WORK.has(c))w++});
-    h+=`${wk[k]?'<td class="gap"></td>':''}<td>${f?'<span class="zero">–</span>':w===t?`<span class="full" title="Toute l'équipe au bureau">${w}</span>`:`<span class="${w?"":"zero"}">${w}</span>`}</td>`});
+    h+=`${wk[k]?'<td class="gap"></td>':''}<td class="${d===todayISO?"tc":""}">${f?'<span class="zero">–</span>':w===t?`<span class="full" title="Toute l'équipe au bureau">${w}</span>`:`<span class="${w?"":"zero"}">${w}</span>`}</td>`});
   h+=`</tr></tfoot></table>`;
   $("gridbox").innerHTML=h;
   $("mtitle").textContent=fmt(month+"-15",{month:"long",year:"numeric"});
   const k=MONTHS.indexOf(month);$("prev").disabled=k<=0;$("next").disabled=k>=MONTHS.length-1;
   $("hint").textContent=mi<0?"Choisis ton nom en haut à droite pour pouvoir poser des absences.":
     "Clique sur tes jours, ou glisse pour en prendre plusieurs, puis choisis Congé ou Télétravail en bas de l'écran.";
-  const tc=$("gridbox").querySelector("th.today");
-  if(tc&&!renderGrid.scrolled){renderGrid.scrolled=true;const bx=$("gridbox");bx.scrollLeft=Math.max(0,tc.offsetLeft-bx.clientWidth/2)}
+  if(!renderGrid.scrolled){renderGrid.scrolled=true;userScrolled=false;centerToday();requestAnimationFrame(()=>centerToday())}
 }
+/* centre la grille sur le jour actuel (en tenant compte de la colonne des noms, qui reste fixe) */
+let userScrolled=false;
+function centerToday(){
+  if(userScrolled)return;
+  const bx=$("gridbox"),tc=bx.querySelector("th.today"),nc=bx.querySelector("thead .namecol");
+  if(!tc||!nc||!bx.clientWidth)return;
+  const left=tc.getBoundingClientRect().left-bx.getBoundingClientRect().left+bx.scrollLeft;
+  const visible=bx.clientWidth-nc.offsetWidth;
+  bx.scrollLeft=Math.max(0,left-nc.offsetWidth-(visible-tc.offsetWidth)/2);
+}
+["pointerdown","touchstart","wheel"].forEach(ev=>$("gridbox").addEventListener(ev,()=>{userScrolled=true},{passive:true}));
+addEventListener("load",()=>centerToday());
+addEventListener("pageshow",()=>centerToday());
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>centerToday());
+addEventListener("resize",()=>centerToday());
 
 function renderList(){
   const i=meIdx(),ul=$("mylist");
