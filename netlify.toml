@@ -1,0 +1,3 @@
+[build]
+  command = "python3 tools/wrap.py"
+  publish = "dist"
