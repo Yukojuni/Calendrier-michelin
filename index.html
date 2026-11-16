@@ -16,11 +16,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0B1020; --surface:#141A2E; --sunk:#1B2238; --ink:#E8ECF6; --muted:#8F99B3; --line:#252D46; --focus:#FCE500;
   --s-ent:#2C4370; --s-eco:#B98A2E; --s-cge:#2FB67C; --s-tt:#7D68D6; --s-fer:#323A52; --s-com:#B5607F; --s-tbc:#A8962E;
-  --me-row:#2A2710; --sel:#FCE500; --today-col:rgba(252,229,0,.07); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}}
+  --me-row:#2A2710; --sel:#FCE500; --today-col:rgba(255,255,255,.06); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0B1020; --surface:#141A2E; --sunk:#1B2238; --ink:#E8ECF6; --muted:#8F99B3; --line:#252D46; --focus:#FCE500;
   --s-ent:#2C4370; --s-eco:#B98A2E; --s-cge:#2FB67C; --s-tt:#7D68D6; --s-fer:#323A52; --s-com:#B5607F; --s-tbc:#A8962E;
-  --me-row:#2A2710; --sel:#FCE500; --today-col:rgba(252,229,0,.07); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}
+  --me-row:#2A2710; --sel:#FCE500; --today-col:rgba(255,255,255,.06); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
@@ -151,11 +151,11 @@ h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:b
 .hint{color:var(--muted);font-size:13px;margin:0 0 12px}
 
 .gridbox{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);overflow-x:auto;min-width:0;user-select:none;-webkit-user-select:none}
-table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;margin-right:12px}
+table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;width:100%}
 th,td{padding:0}
 .namecol{position:sticky;left:0;z-index:2;background:var(--surface);text-align:left;padding:0 14px 0 16px;min-width:170px;border-right:1px solid var(--line)}
 thead th{padding-block:12px 8px;font-weight:500;font-size:11.5px;color:var(--muted)}
-thead th.d{width:34px;min-width:34px;text-align:center;text-transform:uppercase}
+thead th.d{min-width:34px;text-align:center;text-transform:uppercase}
 thead th.d .n{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-top:1px}
 thead th.d.today .n{background:var(--ink);color:var(--surface);border-radius:7px;width:24px;height:22px;line-height:22px;margin:1px auto 0}
 .gap{width:8px;min-width:8px}
@@ -163,14 +163,13 @@ thead th.d.today .n{background:var(--ink);color:var(--surface);border-radius:7px
 tbody tr.me td.tc{background:var(--me-row);box-shadow:inset 0 0 0 999px var(--today-col)}
 thead th.tc{border-radius:10px 10px 0 0}
 tfoot td.tc{border-radius:0 0 10px 10px}
-tbody tr.me td.gap{background:var(--surface)}
 .person{display:flex;align-items:center;gap:10px;height:44px}
 .person .nm{font-weight:600;font-size:13.5px;line-height:1.15;display:block}
 .person .sc{display:block;font-size:11.5px;color:var(--muted);font-weight:500}
 tbody tr.me td{background:var(--me-row)}
 tbody tr.me .namecol{background:var(--me-row);box-shadow:inset 3px 0 0 var(--accent)}
 td.c{padding:3px 2px;text-align:center}
-.cell{display:block;width:30px;height:32px;border-radius:7px;border:0;padding:0;margin:0 auto;position:relative;transition:transform .08s}
+.cell{display:block;width:100%;min-width:30px;max-width:46px;height:32px;border-radius:7px;border:0;padding:0;margin:0 auto;position:relative;transition:transform .08s}
 button.cell:hover{transform:scale(1.1)}
 .cell.sel{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--sel)}
 .cell.posed::after{content:"";position:absolute;right:3px;top:3px;width:5px;height:5px;border-radius:50%;background:var(--surface);opacity:.9}
@@ -186,7 +185,7 @@ tfoot .zero{opacity:.4}
 
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 2px 0;font-size:12.5px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
-.legend .cell{width:14px;height:14px;border-radius:4px;display:inline-block;margin:0}
+.legend .cell{width:14px;min-width:0;height:14px;border-radius:4px;display:inline-block;margin:0}
 .legend .cell.s-X::before{inset:auto 3px 2px;height:2px}
 .legend .cell.posed::after{width:4px;height:4px;right:2px;top:2px;background:var(--ink);opacity:.6}
 
