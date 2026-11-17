@@ -249,11 +249,18 @@ class TirePainter extends CustomPainter {
 }
 
 class _Meme {
-  const _Meme.macro(this.top, this.bottom) : quote = null, source = null;
-  const _Meme.quote(this.quote, this.source) : top = null, bottom = null;
+  const _Meme.macro(this.top, this.bottom) : quote = null, source = null, image = null;
+  const _Meme.quote(this.quote, this.source) : top = null, bottom = null, image = null;
+  const _Meme.image(this.image) : top = null, bottom = null, quote = null, source = null;
 
   final String? top, bottom, quote, source;
+
+  /// Image seule, sans texte.
+  final String? image;
 }
+
+/// Surprise cachée : sort environ 1 fois sur 8.
+const _hidden = _Meme.image('assets/memes/sam.jpg');
 
 List<_Meme> _memes(QuentinInfo q) {
   final n = q.daysLeft, w = q.workDaysLeft, pct = q.percent;
@@ -290,6 +297,10 @@ class _MemeDialogState extends State<MemeDialog> {
   late _Meme _meme = _pick();
 
   _Meme _pick() {
+    if (_random.nextInt(8) == 0 && _last != -2) {
+      _last = -2;
+      return _hidden;
+    }
     final list = _memes(widget.info);
     int k;
     do {
@@ -312,7 +323,9 @@ class _MemeDialogState extends State<MemeDialog> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            if (m.quote != null)
+            if (m.image != null)
+              ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.asset(m.image!, fit: BoxFit.cover))
+            else if (m.quote != null)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
                 decoration: BoxDecoration(color: Palette.accent, borderRadius: BorderRadius.circular(14)),
