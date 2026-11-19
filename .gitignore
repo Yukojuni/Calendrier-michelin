@@ -52,3 +52,7 @@ app.*.map.json
 
 # Config Supabase locale
 /supabase.json
+
+# Dépendances Node (API Netlify)
+node_modules/
+.netlify/

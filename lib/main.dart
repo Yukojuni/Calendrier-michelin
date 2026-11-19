@@ -1,12 +1,13 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_state.dart';
 import 'games/score_store.dart';
+import 'remote.dart';
 import 'store.dart';
 import 'theme.dart';
 import 'ui/confetti.dart';
@@ -23,17 +24,26 @@ Future<void> main() async {
   runApp(GuideApp(state: state));
 }
 
-/// Configuration Supabase, passée à la compilation :
-/// `--dart-define-from-file=supabase.json` (voir supabase.example.json).
-const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const _supabaseKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+/// Adresse de l'API (netlify/functions/api.mts).
+/// - Web : le site appelle sa propre adresse `/api/`, rien à configurer.
+/// - Apps iOS / Android : `--dart-define=API_URL=https://calendrier-alternant.netlify.app/api`.
+const _apiUrl = String.fromEnvironment('API_URL');
 
-/// Stockage partagé Supabase si configuré, sinon stockage sur l'appareil.
+Uri? _apiBase() {
+  if (_apiUrl.isNotEmpty) return Uri.parse(_apiUrl);
+  if (!kIsWeb) return null;
+  final host = Uri.base.host;
+  // En développement local, pas de serveur : stockage sur l'appareil.
+  if (host == 'localhost' || host == '127.0.0.1') return null;
+  return Uri.base.resolve('/api/');
+}
+
+/// Stockage partagé via l'API Netlify si elle est joignable, sinon stockage sur l'appareil.
 Future<(AbsenceStore, ScoreStore)> _openStores(SharedPreferences prefs) async {
-  if (_supabaseUrl.isEmpty || _supabaseKey.isEmpty) return (LocalAbsenceStore(prefs), LocalScoreStore(prefs));
-  await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseKey);
-  final db = Supabase.instance.client;
-  return (SupabaseAbsenceStore(db), SupabaseScoreStore(db));
+  final base = _apiBase();
+  if (base == null) return (LocalAbsenceStore(prefs), LocalScoreStore(prefs));
+  final api = ApiClient(base);
+  return (HttpAbsenceStore(api), HttpScoreStore(api));
 }
 
 class GuideApp extends StatelessWidget {

@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Identifiants des jeux.
 abstract final class Games {
@@ -50,35 +49,6 @@ class LocalScoreStore implements ScoreStore {
     scores[person] = score;
     await _prefs.setString(_key, jsonEncode(_data));
     _changes.add(game);
-    return true;
-  }
-}
-
-/// Scores partagés avec l'équipe, dans la table `scores` de Supabase (voir supabase/schema.sql).
-class SupabaseScoreStore implements ScoreStore {
-  SupabaseScoreStore(this._db);
-
-  static const _table = 'scores';
-  final SupabaseClient _db;
-
-  @override
-  Stream<Map<String, int>> watch(String game) => _db
-      .from(_table)
-      .stream(primaryKey: ['id'])
-      .eq('game', game)
-      .map(
-        (rows) => {
-          for (final r in rows)
-            if (r['person'] is String && r['score'] is int) r['person'] as String: r['score'] as int,
-        },
-      );
-
-  @override
-  Future<bool> submit(String game, String person, int score) async {
-    final id = '${game}_$person';
-    final current = await _db.from(_table).select('score').eq('id', id).maybeSingle();
-    if (current != null && (current['score'] as int? ?? 0) >= score) return false;
-    await _db.from(_table).upsert({'id': id, 'game': game, 'person': person, 'score': score, 'updated_at': DateTime.now().toUtc().toIso8601String()});
     return true;
   }
 }

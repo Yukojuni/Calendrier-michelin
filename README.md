@@ -19,18 +19,22 @@ flutter test                   # tests
 
 Version de Flutter utilisée : **3.47.9** (stable).
 
-## Base de données (Supabase)
+## Données partagées (Netlify)
 
-1. Créer un projet sur supabase.com.
-2. Dans **SQL Editor**, coller et lancer `supabase/schema.sql` (crée les tables `absences` et `scores`, leurs règles et le temps réel).
-3. Récupérer dans **Project Settings > API** l'URL du projet et la **clé publishable** (`sb_publishable_…`).
-   Cette clé est faite pour être embarquée dans l'app ; ne jamais utiliser la clé *secret* / *service_role*.
-4. En local : copier `supabase.example.json` en `supabase.json` (ignoré par git), le remplir, puis
-   `flutter run --dart-define-from-file=supabase.json`.
-5. Sur Netlify : ajouter les variables `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY`
-   (Site configuration > Environment variables), puis redéployer.
+Les congés et les scores sont partagés via une petite API hébergée sur Netlify, gratuite :
+`netlify/functions/api.mts` (Netlify Functions) stocke deux documents JSON dans **Netlify Blobs**.
+Rien à créer ni à configurer : Netlify active Functions et Blobs tout seul au déploiement.
 
-Sans configuration, l'app enregistre les congés sur l'appareil.
+- Le site web appelle `/api` sur sa propre adresse.
+- Pas de temps réel : l'app relit le planning toutes les 20 secondes et juste après chaque modification.
+- Chaque écriture vérifie que personne n'a écrit entre-temps : deux modifications simultanées ne se perdent pas.
+- L'API est ouverte (pas de comptes) : quiconque a l'adresse du site peut modifier le planning.
+
+Tests de l'API : `npm install && npm test`.
+
+En local, sans Netlify : `flutter build web --dart-define=API_URL=http://localhost:8787/api`
+puis `node --experimental-strip-types tools/dev_server.mts` (données en mémoire).
+Avec `flutter run -d chrome` (sans API), l'app enregistre sur l'appareil.
 
 ## Déploiement web (Netlify)
 
@@ -39,7 +43,7 @@ Rien à régler côté Netlify.
 
 ## Apps mobiles
 
-Pour les apps, ajouter `--dart-define-from-file=supabase.json` aux commandes de build.
+Pour les apps, ajouter `--dart-define=API_URL=https://calendrier-alternant.netlify.app/api` aux commandes de build (sinon l'app enregistre sur l'appareil).
 
 - **Android** : `flutter build appbundle` puis envoi sur la Google Play Console (compte développeur : 25 $ une fois).
 - **iOS** : il faut un Mac avec Xcode et un compte Apple Developer (99 $/an) : `flutter build ipa` puis envoi sur App Store Connect.
@@ -50,8 +54,8 @@ Identifiant de l'app : `com.calendrieralternant.calendrier_alternant`.
 
 - `lib/data/planning_data.dart` : planning d'origine (généré, ne pas modifier à la main).
 - `lib/planning.dart` : règles (qui est où, ce qu'on peut modifier), photos de profil.
-- `lib/store.dart` : stockage des congés. **Supabase** (partagé, temps réel) si configuré,
-  sinon sur l'appareil.
+- `lib/store.dart`, `lib/remote.dart` : stockage des congés et des scores, via l'API Netlify ou sur l'appareil.
+- `netlify/functions/api.mts` : l'API.
 - `lib/app_state.dart` : état de l'app. `lib/ui/` : écrans.
 - `assets/photos/` : photos de profil (prénom en minuscules).
 
