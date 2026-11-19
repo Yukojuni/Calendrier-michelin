@@ -10,6 +10,7 @@ import 'store.dart';
 import 'theme.dart';
 import 'ui/confetti.dart';
 import 'ui/home_page.dart';
+import 'ui/intro_trailer.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,6 +53,7 @@ class GuideApp extends StatelessWidget {
       builder: (context, child) => Stack(children: [
         ?child,
         Positioned.fill(child: IgnorePointer(child: ConfettiLayer(trigger: state.confetti))),
+        const Positioned.fill(child: IntroTrailer()),
       ]),
       home: HomePage(state: state),
     );
