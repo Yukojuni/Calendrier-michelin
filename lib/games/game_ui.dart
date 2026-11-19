@@ -104,6 +104,7 @@ class GameOverPanel extends StatefulWidget {
     required this.score,
     required this.rank,
     required this.detail,
+    this.epilogue,
     required this.onReplay,
   });
 
@@ -112,6 +113,9 @@ class GameOverPanel extends StatefulWidget {
   final int score;
   final String rank;
   final String detail;
+
+  /// Fin de l'histoire, selon le score.
+  final String? epilogue;
   final VoidCallback onReplay;
 
   @override
@@ -153,6 +157,14 @@ class _GameOverPanelState extends State<GameOverPanel> {
             Text(px(widget.rank.toUpperCase()), textAlign: TextAlign.center, style: pixelTitle(11)),
             const SizedBox(height: 8),
             Text(widget.detail, textAlign: TextAlign.center, style: pixelBody(20, color: const Color(0xFFC9B8E6))),
+            if (widget.epilogue != null) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(border: Border.all(color: const Color(0xFF4A3A68), width: 3)),
+                child: Text(widget.epilogue!, textAlign: TextAlign.center, style: pixelBody(21, color: Palette.yellow)),
+              ),
+            ],
             if (_record) ...[
               const SizedBox(height: 10),
               Container(

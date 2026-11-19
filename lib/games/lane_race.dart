@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import '../app_state.dart';
 import '../theme.dart';
 import 'game_ui.dart';
+import 'lore.dart';
 import 'pixel.dart';
 import 'score_store.dart';
 
@@ -184,7 +185,7 @@ class _Thing {
   bool taken = false;
 }
 
-enum _Phase { intro, countdown, playing, over }
+enum _Phase { story, intro, countdown, playing, over }
 
 class LaneRaceGame extends StatefulWidget {
   const LaneRaceGame({super.key, required this.state});
@@ -203,7 +204,9 @@ class _LaneRaceGameState extends State<LaneRaceGame> with SingleTickerProviderSt
   final _focus = FocusNode();
   late final Sprite _car = carSprite(kLooks[widget.state.me]);
 
-  _Phase _phase = _Phase.intro;
+  _Phase _phase = _Phase.story;
+  ({String text, double born})? _sign;
+  int _signIdx = 0;
   Size _size = const Size(400, 700);
   Duration _last = Duration.zero;
   double _t = 0, _scroll = 0, _distance = 0, _sinceSpawn = 0, _speedBoost = 0;
@@ -225,6 +228,21 @@ class _LaneRaceGameState extends State<LaneRaceGame> with SingleTickerProviderSt
   int get _score => (_distance / (2.5 * _u)).floor() + _conges * 50;
 
   @override
+  void initState() {
+    super.initState();
+    // L'histoire ne s'affiche d'elle-même que la première fois.
+    storySeen(Games.race).then((seen) {
+      if (seen && mounted && _phase == _Phase.story) setState(() => _phase = _Phase.intro);
+    });
+  }
+
+  void _storyDone() {
+    markStorySeen(Games.race);
+    setState(() => _phase = _Phase.intro);
+    _focus.requestFocus();
+  }
+
+  @override
   void dispose() {
     _ticker.dispose();
     _focus.dispose();
@@ -244,6 +262,8 @@ class _LaneRaceGameState extends State<LaneRaceGame> with SingleTickerProviderSt
       _things.clear();
       _pops.clear();
       _last = Duration.zero;
+      _sign = null;
+      _signIdx = 0;
     });
     _ticker
       ..stop()
@@ -268,6 +288,9 @@ class _LaneRaceGameState extends State<LaneRaceGame> with SingleTickerProviderSt
   }
 
   void _update(double dt) {
+    if (_signIdx < kRaceSigns.length && _score >= kRaceSigns[_signIdx].$1) {
+      _sign = (text: kRaceSigns[_signIdx++].$2, born: _t);
+    }
     _speedBoost = min(420, _speedBoost + 11 * dt);
     final move = _speed * dt;
     _scroll += move;
@@ -444,6 +467,8 @@ class _LaneRaceGameState extends State<LaneRaceGame> with SingleTickerProviderSt
                 child: IgnorePointer(child: Text(px(p.text), textAlign: TextAlign.center, style: pixelTitle(12, color: p.color))),
               ),
             if (_phase == _Phase.countdown || (_phase == _Phase.playing && _g < .6)) CountdownText(remaining: _countdown - _t),
+            if (_phase == _Phase.playing && _sign != null && _t - _sign!.born < 2.6) LoreBanner(text: _sign!.text, sign: true),
+            if (_phase == _Phase.story) StoryOverlay(title: 'ROUTE DES CONGÉS', lines: kStories[Games.race]!, onDone: _storyDone),
             if (_phase == _Phase.intro) _intro(),
             if (_phase == _Phase.over)
               Positioned.fill(
@@ -454,6 +479,7 @@ class _LaneRaceGameState extends State<LaneRaceGame> with SingleTickerProviderSt
                   rank: _rank,
                   detail: '$_conges jour${_conges > 1 ? 's' : ''} de congé ramassé${_conges > 1 ? 's' : ''}, '
                       '$_dodged obstacle${_dodged > 1 ? 's' : ''} esquivé${_dodged > 1 ? 's' : ''}.',
+                  epilogue: raceEpilogue(_score),
                   onReplay: _start,
                 ),
               ),
@@ -496,7 +522,11 @@ class _LaneRaceGameState extends State<LaneRaceGame> with SingleTickerProviderSt
                 Text("Téléphone : touche à gauche ou à droite.\nOrdinateur : flèches gauche / droite.",
                     textAlign: TextAlign.center, style: pixelBody(19, color: const Color(0xFFC9B8E6))),
                 const SizedBox(height: 16),
-                SizedBox(width: double.infinity, child: PixelButton(label: 'DÉMARRER', autofocus: true, onPressed: _start)),
+                Row(children: [
+                  Expanded(child: PixelButton(label: 'HISTOIRE', color: const Color(0xFF9A8CB8), onPressed: () => setState(() => _phase = _Phase.story))),
+                  const SizedBox(width: 10),
+                  Expanded(flex: 2, child: PixelButton(label: 'DÉMARRER', autofocus: true, onPressed: _start)),
+                ]),
               ]),
             ),
           ),

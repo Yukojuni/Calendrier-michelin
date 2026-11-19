@@ -11,6 +11,7 @@ import '../app_state.dart';
 import '../planning.dart';
 import '../theme.dart';
 import 'game_ui.dart';
+import 'lore.dart';
 import 'pixel.dart';
 import 'score_store.dart';
 
@@ -34,7 +35,7 @@ class _Floater {
   final double born;
 }
 
-enum _Phase { intro, countdown, playing, over }
+enum _Phase { story, intro, countdown, playing, over }
 
 const _red = Color(0xFFFF4D4D);
 
@@ -59,7 +60,9 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
   ];
   late final Map<int, Sprite> _sprites = {for (var i = 0; i < kPeople.length; i++) i: personSprite(kPeople[i].name)};
 
-  _Phase _phase = _Phase.intro;
+  _Phase _phase = _Phase.story;
+  ({String speaker, String text, double born})? _radio;
+  int _radioIdx = 0;
   double _t = 0; // secondes depuis le début du décompte
   List<_Slot?> _slots = List.filled(_windows, null);
   final List<_Floater> _floaters = [];
@@ -67,6 +70,20 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
   int _score = 0, _combo = 0, _caught = 0, _wrong = 0, _escaped = 0;
 
   double get _g => _t - _countdown; // temps de jeu
+
+  @override
+  void initState() {
+    super.initState();
+    // L'histoire ne s'affiche d'elle-même que la première fois.
+    storySeen(Games.catchQuentin).then((seen) {
+      if (seen && mounted && _phase == _Phase.story) setState(() => _phase = _Phase.intro);
+    });
+  }
+
+  void _storyDone() {
+    markStorySeen(Games.catchQuentin);
+    setState(() => _phase = _Phase.intro);
+  }
 
   @override
   void dispose() {
@@ -84,6 +101,8 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
       _shakeUntil = -1;
       _lastGolden = -10;
       _score = _combo = _caught = _wrong = _escaped = 0;
+      _radio = null;
+      _radioIdx = 0;
     });
     _ticker
       ..stop()
@@ -107,6 +126,10 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
   }
 
   void _update(double g) {
+    if (_radioIdx < kCatchRadio.length && g >= kCatchRadio[_radioIdx].$1) {
+      final (_, speaker, text) = kCatchRadio[_radioIdx++];
+      _radio = (speaker: speaker, text: text, born: _t);
+    }
     final d = g / _duration; // difficulté 0 → 1
     for (var k = 0; k < _windows; k++) {
       final s = _slots[k];
@@ -202,6 +225,9 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
           ),
         ),
         if (_phase == _Phase.countdown || (_phase == _Phase.playing && _g < .6)) CountdownText(remaining: _countdown - _t),
+        if (_phase == _Phase.playing && _radio != null && _t - _radio!.born < 2.8)
+          LoreBanner(text: _radio!.text, speaker: _radio!.speaker),
+        if (_phase == _Phase.story) StoryOverlay(title: 'ATTRAPE QUENTIN', lines: kStories[Games.catchQuentin]!, onDone: _storyDone),
         if (_phase == _Phase.intro) _intro(),
         if (_phase == _Phase.over)
           Positioned.fill(
@@ -212,6 +238,7 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
               rank: _rank,
               detail: '$_caught Quentin raccompagné${_caught > 1 ? 's' : ''}, $_escaped échappé${_escaped > 1 ? 's' : ''}, '
                   '$_wrong collègue${_wrong > 1 ? 's' : ''} dérangé${_wrong > 1 ? 's' : ''} par erreur.',
+              epilogue: catchEpilogue(_score),
               onReplay: _start,
             ),
           ),
@@ -315,7 +342,11 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
                 const _Rule(color: Palette.cyan, text: 'Quentin à couronne : jackpot de 50 points.'),
                 const _Rule(color: _red, text: 'Ne touche pas les collègues : -15 et combo perdu.'),
                 const SizedBox(height: 16),
-                SizedBox(width: double.infinity, child: PixelButton(label: 'JOUER  30 S', autofocus: true, onPressed: _start)),
+                Row(children: [
+                  Expanded(child: PixelButton(label: 'HISTOIRE', color: const Color(0xFF9A8CB8), onPressed: () => setState(() => _phase = _Phase.story))),
+                  const SizedBox(width: 10),
+                  Expanded(flex: 2, child: PixelButton(label: 'JOUER  30 S', autofocus: true, onPressed: _start)),
+                ]),
               ]),
             ),
           ),

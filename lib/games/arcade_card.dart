@@ -8,6 +8,7 @@ import '../theme.dart';
 import '../ui/widgets.dart';
 import 'catch_quentin.dart';
 import 'lane_race.dart';
+import 'lore.dart';
 import 'pixel.dart';
 import 'score_store.dart';
 
@@ -53,7 +54,7 @@ class ArcadeCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Text("Deux mini-jeux, un classement d'équipe.", style: TextStyle(color: context.pal.muted, fontSize: 13)),
+          Text("Deux mini-jeux, une histoire, un classement d'équipe.", style: TextStyle(color: context.pal.muted, fontSize: 13)),
           const SizedBox(height: 14),
           LayoutBuilder(
             builder: (context, c) {
@@ -68,6 +69,26 @@ class ArcadeCard extends StatelessWidget {
                 ],
               );
             },
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => showCharacterSheets(context),
+                icon: const Icon(Icons.groups_rounded, size: 18),
+                label: const Text('Les personnages', style: TextStyle(fontWeight: FontWeight.w700)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Palette.yellow,
+                  side: const BorderSide(color: Palette.yellow, width: 1.5),
+                  minimumSize: const Size(0, 44),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              Text('Fiches, pouvoirs et faiblesses de chacun.', style: TextStyle(color: context.pal.muted, fontSize: 12.5)),
+            ],
           ),
         ],
       ),
