@@ -8,6 +8,7 @@ import '../theme.dart';
 import '../ui/widgets.dart';
 import 'catch_quentin.dart';
 import 'lane_race.dart';
+import 'pixel.dart';
 import 'score_store.dart';
 
 class ArcadeCard extends StatelessWidget {
@@ -26,7 +27,7 @@ class ArcadeCard extends StatelessWidget {
         title: 'ATTRAPE QUENTIN',
         pitch: 'Raccompagne-le à la sortie avant la fin du chrono.',
         color: Palette.cyan,
-        icon: Icons.ads_click_rounded,
+        art: const PixelAvatar('Quentin', size: 40),
         onTap: () => _open(context, CatchQuentinGame(state: state)),
       ),
       _GameTile(
@@ -35,7 +36,7 @@ class ArcadeCard extends StatelessWidget {
         title: 'ROUTE DES CONGÉS',
         pitch: 'Esquive les réunions, ramasse les jours de congé.',
         color: Palette.pink,
-        icon: Icons.directions_car_filled_rounded,
+        art: CustomPaint(size: const Size(32, 36), painter: _SpritePainter(carSprite(kLooks[state.me]))),
         onTap: () => _open(context, LaneRaceGame(state: state)),
       ),
     ];
@@ -81,14 +82,14 @@ class _GameTile extends StatelessWidget {
     required this.title,
     required this.pitch,
     required this.color,
-    required this.icon,
+    required this.art,
     required this.onTap,
   });
 
   final AppState state;
   final String game, title, pitch;
   final Color color;
-  final IconData icon;
+  final Widget art;
   final VoidCallback onTap;
 
   @override
@@ -108,10 +109,11 @@ class _GameTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
-              child: Icon(icon, color: Palette.night, size: 28),
+              width: 56,
+              height: 56,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: Colors.black, border: Border.all(color: color, width: 3)),
+              child: art,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -143,4 +145,16 @@ class _GameTile extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _SpritePainter extends CustomPainter {
+  _SpritePainter(this.sprite);
+
+  final Sprite sprite;
+
+  @override
+  void paint(Canvas canvas, Size size) => sprite.paint(canvas, Offset.zero, size.width / sprite.width);
+
+  @override
+  bool shouldRepaint(_SpritePainter old) => false;
 }
