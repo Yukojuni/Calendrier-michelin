@@ -74,49 +74,44 @@ class _QuentinCardState extends State<QuentinCard> {
     final info = widget.info;
     final left = info.left;
     final gone = left.isNegative;
-    const fg = Colors.white;
-    final dim = Colors.white.withValues(alpha: .65);
+    final dim = context.pal.muted;
     final last = DateFormat('EEEE d MMMM y').format(parseIso(info.days.last));
-
-    final who = Row(mainAxisSize: MainAxisSize.min, children: [
-      Avatar(kPeople[info.index], size: 60, ring: Palette.accent),
-      const SizedBox(width: 14),
-      Flexible(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Eyebrow('Compte à rebours officiel', color: Palette.accent),
-          const SizedBox(height: 2),
-          Text(gone ? "Quentin est parti. C'est la fête !" : 'Départ de Quentin', style: display(24, weight: FontWeight.w800, color: fg)),
-          const SizedBox(height: 3),
-          Text('Fin de stage le $last, 18 h', style: TextStyle(color: dim, fontSize: 13)),
-        ]),
-      ),
-    ]);
 
     Widget countdown;
     if (gone) {
       final since = (-left.inSeconds) ~/ 86400;
       countdown = Text(since > 0 ? 'Libres depuis $since jour${since > 1 ? 's' : ''}' : "C'est aujourd'hui !",
-          style: display(26, weight: FontWeight.w800, color: Palette.accent));
+          style: display(30, color: Palette.yellow));
     } else {
       final s = left.inSeconds;
-      countdown = Wrap(spacing: 8, runSpacing: 8, children: [
-        _Unit(s ~/ 86400, 'jours'),
-        _Unit((s ~/ 3600) % 24, 'heures'),
-        _Unit((s ~/ 60) % 60, 'min'),
-        _Unit(s % 60, 'sec'),
+      countdown = Row(children: [
+        Expanded(child: _Unit(s ~/ 86400, 'jours', hot: true)),
+        const SizedBox(width: 8),
+        Expanded(child: _Unit((s ~/ 3600) % 24, 'heures')),
+        const SizedBox(width: 8),
+        Expanded(child: _Unit((s ~/ 60) % 60, 'min')),
+        const SizedBox(width: 8),
+        Expanded(child: _Unit(s % 60, 'sec')),
       ]);
     }
 
-    final button = FilledButton(
-      onPressed: _motivate,
-      style: FilledButton.styleFrom(
-        backgroundColor: Palette.accent,
-        foregroundColor: Palette.accentInk,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+    final button = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _motivate,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          height: 56,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(colors: [Palette.pink, Palette.orange]),
+            boxShadow: [BoxShadow(color: Palette.pink.withValues(alpha: .45), blurRadius: 24)],
+          ),
+          child: Center(
+            child: Text(gone ? 'RELANCER LA FÊTE' : 'BESOIN DE MOTIVATION ?', style: display(21, color: Palette.night)),
+          ),
+        ),
       ),
-      child: Text(gone ? 'Relancer la fête' : 'Besoin de motivation ?'),
     );
 
     final track = Row(children: [
@@ -124,53 +119,140 @@ class _QuentinCardState extends State<QuentinCard> {
       const SizedBox(width: 12),
       Expanded(child: _Progress(percent: info.percent)),
       const SizedBox(width: 12),
-      Text('${info.percent} %', style: const TextStyle(color: fg, fontWeight: FontWeight.w700, fontSize: 12.5)),
+      Text('${info.percent} %', style: TextStyle(color: context.pal.ink, fontWeight: FontWeight.w700, fontSize: 12.5)),
+    ]);
+
+    final details = Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+      const Eyebrow('Compte à rebours officiel', color: Palette.yellow),
+      const SizedBox(height: 4),
+      Text(gone ? "QUENTIN EST PARTI. C'EST LA FÊTE !" : 'DÉPART DE QUENTIN', style: display(30, color: context.pal.ink)),
+      Text('Fin de stage le $last, 18 h', style: TextStyle(color: dim, fontSize: 13)),
+      const SizedBox(height: 14),
+      countdown,
+      const SizedBox(height: 14),
+      track,
+      const SizedBox(height: 16),
+      button,
+      const SizedBox(height: 10),
+      Center(child: Text("Courage, c'est bientôt fini", style: neon(24))),
     ]);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
-      decoration: BoxDecoration(color: Palette.navy, borderRadius: BorderRadius.circular(18)),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.pal.line),
+        gradient: const RadialGradient(
+          center: Alignment(0, -1.1),
+          radius: 1.3,
+          colors: [Color(0xFF3A1660), Palette.night],
+        ),
+      ),
       child: LayoutBuilder(builder: (context, c) {
-        final wide = c.maxWidth >= 820;
-        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (wide)
-            Row(children: [
-              Expanded(child: who),
-              countdown,
-              const SizedBox(width: 24),
-              button,
-            ])
-          else ...[
-            who,
-            const SizedBox(height: 16),
-            countdown,
-            const SizedBox(height: 16),
-            button,
-          ],
-          const SizedBox(height: 18),
-          track,
+        final poster = _WantedPoster(info: info, last: last);
+        if (c.maxWidth >= 600) {
+          return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            Padding(padding: const EdgeInsets.fromLTRB(6, 6, 28, 6), child: poster),
+            Expanded(child: details),
+          ]);
+        }
+        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Center(child: poster),
+          const SizedBox(height: 22),
+          details,
         ]);
       }),
     );
   }
 }
 
+/// Affiche « Avis de départ » façon western.
+class _WantedPoster extends StatelessWidget {
+  const _WantedPoster({required this.info, required this.last});
+
+  final QuentinInfo info;
+  final String last;
+
+  static const _sepia = ColorFilter.matrix([
+    0.54, 0.59, 0.15, 0, 10, //
+    0.47, 0.55, 0.13, 0, 6,
+    0.37, 0.43, 0.10, 0, 0,
+    0, 0, 0, 1, 0,
+  ]);
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = kPeople[info.index].photo;
+    return Transform.rotate(
+      angle: -.045,
+      child: Container(
+        width: 250,
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+        decoration: BoxDecoration(
+          color: Palette.paper,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: .55), blurRadius: 36, offset: const Offset(0, 16)),
+            BoxShadow(color: Palette.yellow.withValues(alpha: .12), spreadRadius: 6),
+          ],
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('AVIS DE DÉPART', style: display(32, color: Palette.paperInk)),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(border: Border.all(color: Palette.paperInk, width: 4)),
+            child: SizedBox(
+              width: 184,
+              height: 184,
+              child: photo == null
+                  ? const ColoredBox(color: Palette.paperInk)
+                  : ColorFiltered(colorFilter: _sepia, child: Image.asset(photo, fit: BoxFit.cover)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text('QUENTIN', style: display(28, color: Palette.paperInk)),
+          const SizedBox(height: 2),
+          Text('Stagiaire. Libération prévue le\n$last, 18 h',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Palette.paperInk, height: 1.35)),
+          const SizedBox(height: 8),
+          Semantics(
+            label: "Niveau d'impatience de l'équipe : 4 sur 5",
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Text('IMPATIENCE',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1, color: Palette.paperInk)),
+              const SizedBox(width: 6),
+              for (var k = 0; k < 5; k++)
+                Icon(k < 4 ? Icons.star_rounded : Icons.star_outline_rounded, size: 17, color: const Color(0xFFC2410C)),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
 class _Unit extends StatelessWidget {
-  const _Unit(this.value, this.label);
+  const _Unit(this.value, this.label, {this.hot = false});
 
   final int value;
   final String label;
+  final bool hot;
 
   @override
   Widget build(BuildContext context) => Container(
-        width: 66,
         padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(color: Colors.white.withValues(alpha: .1), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: hot ? Palette.pink.withValues(alpha: .12) : Colors.white.withValues(alpha: .06),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: hot ? Palette.pink : Colors.white.withValues(alpha: .18), width: 1.5),
+          boxShadow: hot ? [BoxShadow(color: Palette.pink.withValues(alpha: .35), blurRadius: 16)] : null,
+        ),
         child: Column(children: [
           Text(value.toString().padLeft(2, '0'),
-              style: display(28, weight: FontWeight.w800, color: Colors.white).copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+              style: display(32, color: Colors.white).copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
           Text(label.toUpperCase(),
-              style: TextStyle(fontSize: 10.5, letterSpacing: .8, color: Colors.white.withValues(alpha: .65))),
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1, color: hot ? const Color(0xFFFFB3D6) : context.pal.muted)),
         ]),
       );
 }
@@ -192,7 +274,7 @@ class _Progress extends StatelessWidget {
               width: x,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(99),
-                gradient: const LinearGradient(colors: [Color(0xFFA996F2), Palette.accent]),
+                gradient: const LinearGradient(colors: [Palette.violet, Palette.pink, Palette.yellow]),
               ),
             ),
             Positioned(left: x - 12, child: const _SpinningTire()),
@@ -259,8 +341,8 @@ class _Meme {
   final String? image;
 }
 
-/// Surprise cachée : sort environ 1 fois sur 8.
-const _hidden = _Meme.image('assets/memes/sam.jpg');
+/// Surprises cachées : l'une d'elles sort environ 1 fois sur 8.
+const _hidden = [_Meme.image('assets/memes/sam.jpg'), _Meme.image('assets/memes/vice.jpg')];
 
 List<_Meme> _memes(QuentinInfo q) {
   final n = q.daysLeft, w = q.workDaysLeft, pct = q.percent;
@@ -297,9 +379,10 @@ class _MemeDialogState extends State<MemeDialog> {
   late _Meme _meme = _pick();
 
   _Meme _pick() {
-    if (_random.nextInt(8) == 0 && _last != -2) {
-      _last = -2;
-      return _hidden;
+    if (_random.nextInt(8) == 0 && _last > -2) {
+      final k = _random.nextInt(_hidden.length);
+      _last = -2 - k;
+      return _hidden[k];
     }
     final list = _memes(widget.info);
     int k;

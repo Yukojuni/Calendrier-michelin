@@ -20,8 +20,8 @@ class Panel extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: p.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .06), blurRadius: 24, offset: const Offset(0, 8))],
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: p.line),
       ),
       child: child,
     );

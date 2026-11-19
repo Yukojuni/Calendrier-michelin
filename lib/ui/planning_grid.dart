@@ -89,7 +89,7 @@ class _PlanningGridState extends State<PlanningGrid> {
           height: _headerH,
           child: Align(
             alignment: nameW < 100 ? Alignment.center : const Alignment(-.7, 0),
-            child: const Eyebrow('Équipe'),
+            child: const Eyebrow('Équipe', color: Palette.yellow),
           ),
         ),
         for (final i in rows) _NameCell(person: kPeople[i], mine: i == me, compact: nameW < 100),
@@ -109,8 +109,14 @@ class _PlanningGridState extends State<PlanningGrid> {
           const SizedBox(height: 2),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-            decoration: isToday ? BoxDecoration(color: p.ink, borderRadius: BorderRadius.circular(7)) : null,
-            child: Text('${d.day}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isToday ? p.surface : p.ink)),
+            decoration: isToday
+                ? BoxDecoration(
+                    color: Palette.yellow,
+                    borderRadius: BorderRadius.circular(7),
+                    boxShadow: [BoxShadow(color: Palette.yellow.withValues(alpha: .6), blurRadius: 10)],
+                  )
+                : null,
+            child: Text('${d.day}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: isToday ? Palette.night : p.ink)),
           ),
         ]);
       });
@@ -250,15 +256,16 @@ class _PlanningGridState extends State<PlanningGrid> {
         color: code == 'F' ? null : p.status(code),
         borderRadius: BorderRadius.circular(7),
         border: selected
-            ? Border.all(color: p.sel, width: 2.5)
+            ? Border.all(color: p.sel, width: 3)
             : (code == 'F' ? Border.all(color: p.fer) : null),
+        boxShadow: code == 'K' ? [BoxShadow(color: Palette.pink.withValues(alpha: .55), blurRadius: 12)] : null,
       ),
       child: Stack(children: [
         if (code == 'F') Positioned.fill(child: ClipRRect(borderRadius: BorderRadius.circular(6), child: CustomPaint(painter: HatchPainter(p.fer)))),
         if (code == 'X' || code == 'C')
           Positioned(left: 8, right: 8, bottom: 6, child: Container(height: 3, decoration: BoxDecoration(color: Colors.black.withValues(alpha: .35), borderRadius: BorderRadius.circular(2)))),
         if (posed)
-          Positioned(right: 4, top: 4, child: Container(width: 5, height: 5, decoration: BoxDecoration(color: p.surface, shape: BoxShape.circle))),
+          Positioned(right: 4, top: 4, child: Container(width: 6, height: 6, decoration: const BoxDecoration(color: Palette.night, shape: BoxShape.circle))),
       ]),
     );
     box = Tooltip(message: label, child: box);

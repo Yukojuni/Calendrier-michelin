@@ -1,4 +1,5 @@
-/// Couleurs et typographies (clair / sombre).
+/// Style « Vice » : nuit violette, coucher de soleil rose-orange, néon cyan.
+/// Un seul thème sombre, le même quel que soit le réglage du téléphone.
 library;
 
 import 'package:flutter/material.dart';
@@ -23,46 +24,46 @@ class Palette extends ThemeExtension<Palette> {
     required this.fer,
   });
 
-  static const accent = Color(0xFFFCE500);
-  static const accentInk = Color(0xFF101A33);
-  static const navy = Color(0xFF101A33);
+  // Couleurs de l'univers.
+  static const night = Color(0xFF140A26);
+  static const nightDeep = Color(0xFF0B0516);
+  static const plum = Color(0xFF2A1450);
+  static const pink = Color(0xFFFF4FA3);
+  static const orange = Color(0xFFFF9A3C);
+  static const yellow = Color(0xFFFFD95A);
+  static const cyan = Color(0xFF39E5FF);
+  static const violet = Color(0xFFA98BFF);
+  static const paper = Color(0xFFF3E3C3);
+  static const paperInk = Color(0xFF2A1A0E);
+
+  /// Accent des badges (jour courant, toute l'équipe au bureau…).
+  static const accent = yellow;
+  static const accentInk = night;
+  static const navy = night;
 
   final Color bg, surface, sunk, ink, muted, line, meRow, sel, todayCol;
   final Color ent, eco, cge, tt, fer;
 
-  static const light = Palette(
-    bg: Color(0xFFF4F6FA),
-    surface: Color(0xFFFFFFFF),
-    sunk: Color(0xFFEEF1F7),
-    ink: Color(0xFF101A33),
-    muted: Color(0xFF66708A),
-    line: Color(0xFFE3E7EF),
-    meRow: Color(0xFFFFFBD6),
-    sel: Color(0xFF101A33),
-    todayCol: Color(0x1427509B),
-    ent: Color(0xFFC9D8F2),
-    eco: Color(0xFFF7C66B),
-    cge: Color(0xFF2FB67C),
-    tt: Color(0xFFA996F2),
-    fer: Color(0xFFD9DDE5),
+  static const vice = Palette(
+    bg: night,
+    surface: Color(0xFF1C0E33),
+    sunk: plum,
+    ink: Color(0xFFFFF4FA),
+    muted: Color(0xFFC9B8E6),
+    line: Color(0xFF34244F),
+    meRow: Color(0x1FFFD95A),
+    sel: Color(0xFFFFF4FA),
+    todayCol: Color(0x14FFD95A),
+    ent: cyan,
+    eco: orange,
+    cge: pink,
+    tt: violet,
+    fer: Color(0xFF4A3A68),
   );
 
-  static const dark = Palette(
-    bg: Color(0xFF0B1020),
-    surface: Color(0xFF141A2E),
-    sunk: Color(0xFF1B2238),
-    ink: Color(0xFFE8ECF6),
-    muted: Color(0xFF8F99B3),
-    line: Color(0xFF252D46),
-    meRow: Color(0xFF2A2710),
-    sel: Color(0xFFFCE500),
-    todayCol: Color(0x0FFFFFFF),
-    ent: Color(0xFF2C4370),
-    eco: Color(0xFFB98A2E),
-    cge: Color(0xFF2FB67C),
-    tt: Color(0xFF7D68D6),
-    fer: Color(0xFF323A52),
-  );
+  // Les anciens noms pointent vers le même thème.
+  static const light = vice;
+  static const dark = vice;
 
   /// Couleur d'un statut du planning.
   Color status(String code) => switch (code) {
@@ -85,37 +86,53 @@ extension PaletteX on BuildContext {
   Palette get pal => Theme.of(this).extension<Palette>()!;
 }
 
-TextStyle display(double size, {FontWeight weight = FontWeight.w700, Color? color}) =>
-    GoogleFonts.getFont('Bricolage Grotesque', fontSize: size, fontWeight: weight, color: color, height: 1.15);
+/// Titres : capitales condensées.
+TextStyle display(double size, {FontWeight weight = FontWeight.w400, Color? color}) =>
+    GoogleFonts.anton(fontSize: size, color: color, height: 1.1, letterSpacing: size > 20 ? 1 : .5);
 
-ThemeData buildTheme(Brightness b) {
-  final p = b == Brightness.dark ? Palette.dark : Palette.light;
+/// Écriture néon (« Aujourd'hui », « Courage… »).
+TextStyle neon(double size, {Color color = Palette.cyan}) => GoogleFonts.yellowtail(
+      fontSize: size,
+      color: color,
+      height: 1,
+      shadows: [Shadow(color: color.withValues(alpha: .7), blurRadius: 12)],
+    );
+
+ThemeData buildTheme([Brightness _ = Brightness.dark]) {
+  const p = Palette.vice;
   final base = ThemeData(
-    brightness: b,
+    brightness: Brightness.dark,
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF27509B),
-      brightness: b,
+      seedColor: Palette.pink,
+      brightness: Brightness.dark,
       surface: p.surface,
-      primary: b == Brightness.dark ? Palette.accent : Palette.navy,
-      onPrimary: b == Brightness.dark ? Palette.accentInk : Colors.white,
+      primary: Palette.pink,
+      onPrimary: Palette.night,
+      secondary: Palette.cyan,
     ),
     scaffoldBackgroundColor: p.bg,
-    extensions: [p],
+    extensions: const [p],
   );
   return base.copyWith(
     textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(bodyColor: p.ink, displayColor: p.ink),
     dividerColor: p.line,
     tooltipTheme: TooltipThemeData(
       decoration: BoxDecoration(color: p.ink, borderRadius: BorderRadius.circular(8)),
-      textStyle: TextStyle(color: p.surface, fontSize: 12.5),
+      textStyle: const TextStyle(color: Palette.night, fontSize: 12.5),
       waitDuration: const Duration(milliseconds: 250),
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: p.ink,
-      contentTextStyle: TextStyle(color: p.surface, fontWeight: FontWeight.w600),
+      contentTextStyle: const TextStyle(color: Palette.night, fontWeight: FontWeight.w700),
       width: 420,
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: p.surface,
+      selectedColor: Palette.plum,
+      side: BorderSide(color: p.line),
+      labelStyle: TextStyle(color: p.ink, fontWeight: FontWeight.w600),
     ),
   );
 }
