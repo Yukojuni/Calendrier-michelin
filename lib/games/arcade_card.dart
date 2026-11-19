@@ -26,7 +26,7 @@ class ArcadeCard extends StatelessWidget {
         state: state,
         game: Games.catchQuentin,
         title: 'ATTRAPE QUENTIN',
-        pitch: 'Raccompagne-le à la sortie avant la fin du chrono.',
+        pitch: 'Sors-le de la salle de sieste avant la fin du chrono.',
         color: Palette.cyan,
         art: const PixelAvatar('Quentin', size: 40),
         onTap: () => _open(context, CatchQuentinGame(state: state)),

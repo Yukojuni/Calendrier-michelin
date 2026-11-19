@@ -254,7 +254,7 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(color: Colors.black, border: Border.all(color: Palette.cyan, width: 3)),
-              child: Text('OPEN SPACE 2E', style: pixelTitle(11, color: Palette.cyan)),
+              child: Text('MICHELIN ROANNE', style: pixelTitle(11, color: Palette.cyan)),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -325,7 +325,7 @@ class _CatchQuentinGameState extends State<CatchQuentinGame> with SingleTickerPr
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Text('MISSION', style: pixelTitle(12, color: Palette.cyan)),
                 const SizedBox(height: 8),
-                Text('RACCOMPAGNE\nQUENTIN', textAlign: TextAlign.center, style: pixelTitle(18)),
+                Text('SORS QUENTIN\nDE LA SIESTE', textAlign: TextAlign.center, style: pixelTitle(18)),
                 const SizedBox(height: 16),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Container(

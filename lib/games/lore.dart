@@ -24,14 +24,16 @@ class Bio {
 }
 
 const Map<String, Bio> kBios = {
-  'Quentin': Bio('Le Stagiaire éternel',
-      "Arrivé le 2 novembre, libération prévue le 29 janvier. Pouvoir spécial : réapparaître à n'importe quelle fenêtre. Faiblesse : les pots de départ.", 4, 5, 2),
-  'Lucas': Bio('Le Pilote', "A codé ce guide entre deux réunions. Toujours le pied sur l'accélérateur quand il s'agit de partir en congé.", 5, 2, 4),
-  'Opaline': Bio('La Stratège', 'Pose ses congés six mois à l\'avance. Personne ne sait comment elle obtient toujours les ponts.', 3, 4, 5),
-  'Jenny': Bio("L'Insaisissable", "Introuvable les semaines d'exam, imbattable les semaines d'open space.", 5, 5, 3),
-  'Samuel': Bio('Le Tribun', 'Réclame un référendum pour chaque départ. Le dernier portait sur celui de Quentin : adopté à l\'unanimité.', 2, 1, 5),
-  'Tom': Bio('Le Vigile', "Surveille l'open space depuis son bureau près de la fenêtre. Rien ne lui échappe. Sauf Quentin.", 3, 3, 4),
-  'Romain': Bio('Le Diplomate', "Blazer gris, sourire permanent. Négocie les RTT comme d'autres négocient des contrats.", 3, 4, 4),
+  'Quentin': Bio('Le Stagiaire de la prép',
+      "Stagiaire à la prép. Officiellement : des Excel. En vrai : abonné à la salle de sieste. Pouvoir spécial : disparaître dès qu'une tâche arrive. Libération prévue le 29 janvier.", 2, 5, 1),
+  'Lucas': Bio('Le Data Scientist',
+      'Digital, data science. Partage le bureau des goats avec Tom. Fait parler les données et défend LFI à chaque pause café. Adversaire favori : Samuel.', 4, 2, 5),
+  'Tom': Bio('Le Sauveur des 4000', "Data & IA, même bureau que Lucas. Un jour, il a sauvé 4000 pneus. Personne ne l'a oublié. Surtout pas lui.", 4, 3, 4),
+  'Opaline': Bio('La Voix de la com', "Communication. Maîtrise tous les messages du site, sauf un : arrêter de parler de son mec.", 3, 1, 4),
+  'Jenny': Bio("L'Organisatrice", "Personne ne sait vraiment quel est son poste. Mais tout ce qui est organisé à Roanne, c'est elle.", 4, 5, 5),
+  'Samuel': Bio('Le Prisonnier des moules',
+      "Service des moules de pneus, coincé dans le plus petit bureau du site, sans mission connue. Très à droite, allergique à l'extrême gauche : chaque café avec Lucas finit en débat.", 1, 4, 3),
+  'Romain': Bio("Le Boss de l'OV", "Manager à l'OV, Marseillais. Tout est « le meilleur du monde », et rien n'est jamais en retard : c'est « tranquille ».", 3, 2, 4),
 };
 
 /// Ouvre les fiches personnages de l'équipe.
@@ -136,56 +138,57 @@ class StoryLine {
 
 const Map<String, List<StoryLine>> kStories = {
   Games.catchQuentin: [
-    StoryLine("Le siège, 2e étage. 19 h 04. L'open space est vide... presque."),
-    StoryLine("Chef, il est encore là. Le stagiaire. Il se cache derrière les stores depuis le 2 novembre.", 'Tom'),
-    StoryLine("Son contrat dit 29 janvier. Mais personne n'a jamais vu Quentin quitter le bâtiment."),
-    StoryLine('On a tout essayé : pot de départ, badge désactivé, Wi-Fi coupé. Il revient toujours.', 'Romain'),
-    StoryLine('Je vous entends, vous savez. Je suis juste derrière la fenêtre du milieu.', 'Quentin'),
-    StoryLine('Ta mission : le raccompagner à la sortie. Gentiment. Tu as 30 secondes avant qu\'il retrouve la machine à café.'),
+    StoryLine('Michelin Roanne, 14 h 02. La salle de sieste affiche complet. Une seule personne dedans.'),
+    StoryLine("J'ai organisé le planning de tout le site. Il manque une seule case : où est Quentin ?", 'Jenny'),
+    StoryLine("On a croisé les données avec Lucas. Ses Excel de la prép n'ont pas bougé depuis le 2 novembre.", 'Tom'),
+    StoryLine('Oh, tranquille. Mais là il faut le sortir, c\'est le stagiaire le plus endormi du monde, je te jure.', 'Romain'),
+    StoryLine('Je ne dors pas. Je réfléchis. Les yeux fermés. Derrière la fenêtre du milieu.', 'Quentin'),
+    StoryLine("Ta mission : le réveiller et le raccompagner à la sortie. Tu as 30 secondes avant qu'il retrouve un coussin."),
   ],
   Games.race: [
-    StoryLine('Vendredi, 17 h 58. Ton congé commence à 18 h.'),
-    StoryLine("J'ai posé mes congés il y a six mois. Toi, tu as deux minutes pour quitter la ville.", 'Opaline'),
-    StoryLine('Le boss vient d\'envoyer une invitation : « Point rapide, 18 h 01 ».'),
-    StoryLine('Fonce vers la plage. Évite les réunions, les exams et surtout les mails.', 'Jenny'),
-    StoryLine('Ramasse tous les jours de congé sur la route. Un RTT peut te sauver la vie.', 'Lucas'),
+    StoryLine('Vendredi, 17 h 58, usine de Roanne. Ton congé commence à 18 h. La plage de Vice t\'attend.'),
+    StoryLine("Moi je pars avec mon mec. Je t'ai déjà parlé de mon mec ? Bref. Toi, roule.", 'Opaline'),
+    StoryLine('Une invitation vient de tomber : « Point rapide, 18 h 01, salle OV ».'),
+    StoryLine("Tranquille, c'est cinq minutes. Bon, peut-être une heure. Allez, file !", 'Romain'),
+    StoryLine("J'ai tout organisé : itinéraire, pauses, playlist. Évite juste les réunions, les exams et les mails.", 'Jenny'),
+    StoryLine('Ramasse tous les jours de congé sur la route. Le repos est un droit, camarade.', 'Lucas'),
   ],
 };
 
 /// Messages radio pendant « Attrape Quentin », à ces secondes de jeu.
 const List<(double, String, String)> kCatchRadio = [
-  (8, 'Tom', 'Il a pris un deuxième café !'),
-  (16, 'Romain', "Quentin doré repéré, il a mis la couronne du pot de départ !"),
-  (24, 'Samuel', "Le référendum est clair : il doit sortir avant la fin !"),
+  (8, 'Tom', 'Les données sont formelles : il repart vers la salle de sieste !'),
+  (16, 'Romain', 'Quentin doré ! Il a mis la couronne du pot de départ, peuchère !'),
+  (24, 'Samuel', "Je vois tout depuis mon petit bureau. Il vise l'ascenseur !"),
 ];
 
 /// Panneaux de « Route des congés », à partir de ces scores.
 const List<(int, String)> kRaceSigns = [
-  (300, 'SORTIE PARKING'),
-  (800, 'ROCADE DES RÉUNIONS'),
-  (1500, 'CORNICHE DU PONT DE MAI'),
+  (300, 'SORTIE USINE DE ROANNE'),
+  (800, 'ROCADE DES POINTS OV'),
+  (1500, 'AIRE DE SIESTE DE QUENTIN'),
   (2500, 'VICE BEACH 2 KM'),
   (4000, 'ODEUR DE CRÈME SOLAIRE'),
 ];
 
 String catchEpilogue(int score) {
-  if (score >= 450) return 'Quentin a rendu son badge. L\'open space applaudit. Le 29 janvier peut enfin arriver.';
-  if (score >= 250) return "Quentin est dehors. Il fait coucou par la fenêtre. Le combat reprend demain.";
-  if (score >= 100) return "Quentin a été raccompagné jusqu'au hall. Il est remonté par l'escalier de secours.";
-  return "Quentin s'est caché dans le local imprimante. Il imprime son CV... pour rester.";
+  if (score >= 450) return 'Quentin a rendu son badge et son coussin. La prép respire. Le 29 janvier peut enfin arriver.';
+  if (score >= 250) return "Quentin est dehors. Il cherche déjà une salle de sieste dans le bâtiment d'en face.";
+  if (score >= 100) return "Quentin a été raccompagné jusqu'à l'accueil. Il est remonté faire une sieste « de récupération ».";
+  return 'Quentin s\'est rendormi en salle de sieste. Son Excel affiche toujours « Feuille1 ».';
 }
 
 String raceEpilogue(int score) {
   if (score >= 3000) return 'Vice Beach. Pieds dans le sable. Ton message d\'absence répond à ta place.';
-  if (score >= 1500) return 'La mer est en vue. Tu passes ton téléphone en mode avion.';
-  if (score >= 500) return 'Tu as atteint la rocade. Ton téléphone vibre encore, mais tu ne regardes pas.';
-  return 'Le boss t\'a rattrapé au parking. Le « point rapide » a duré deux heures.';
+  if (score >= 1500) return 'La mer est en vue. Jenny t\'a même réservé un transat.';
+  if (score >= 500) return "Tu as quitté Roanne. Opaline t'envoie une photo de son mec. Tu ne réponds pas.";
+  return 'Romain t\'a rattrapé au parking : « Cinq minutes, tranquille. » Deux heures plus tard, tu y es encore.';
 }
 
 /// Vrai si l'histoire de ce jeu a déjà été vue sur cet appareil.
 Future<bool> storySeen(String game) async {
   try {
-    return (await SharedPreferences.getInstance()).getBool('gdc-lore-$game') ?? false;
+    return (await SharedPreferences.getInstance()).getBool('gdc-lore-v2-$game') ?? false;
   } catch (_) {
     return false;
   }
@@ -193,7 +196,7 @@ Future<bool> storySeen(String game) async {
 
 Future<void> markStorySeen(String game) async {
   try {
-    await (await SharedPreferences.getInstance()).setBool('gdc-lore-$game', true);
+    await (await SharedPreferences.getInstance()).setBool('gdc-lore-v2-$game', true);
   } catch (_) {}
 }
 
