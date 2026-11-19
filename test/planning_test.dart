@@ -1,4 +1,5 @@
 import 'package:calendrier_alternant/app_state.dart';
+import 'package:calendrier_alternant/games/score_store.dart';
 import 'package:calendrier_alternant/models.dart';
 import 'package:calendrier_alternant/planning.dart';
 import 'package:calendrier_alternant/store.dart';
@@ -61,6 +62,17 @@ void main() {
     final back = SupabaseAbsenceStore.fromRow({...row, 'updated_at': '2026-11-16T00:00:00+00:00'})!;
     expect([back.date, back.person, back.kind, back.note], ['2027-03-01', 'Jenny', AbsenceKind.tt, 'Dentiste']);
     expect(SupabaseAbsenceStore.fromRow({'id': 'x', 'kind': 'inconnu'}), isNull);
+  });
+
+  test('les scores ne gardent que le meilleur de chacun', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final scores = LocalScoreStore(prefs);
+    expect(await scores.submit(Games.race, 'Lucas', 120), isTrue);
+    expect(await scores.submit(Games.race, 'Lucas', 80), isFalse);
+    expect(await scores.submit(Games.race, 'Tom', 300), isTrue);
+    expect(await LocalScoreStore(prefs).watch(Games.race).first, {'Lucas': 120, 'Tom': 300});
+    expect(await scores.watch(Games.catchQuentin).first, isEmpty);
   });
 
   test('les jours consécutifs sont regroupés', () {

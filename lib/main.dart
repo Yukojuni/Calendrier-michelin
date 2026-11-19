@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_state.dart';
+import 'games/score_store.dart';
 import 'store.dart';
 import 'theme.dart';
 import 'ui/confetti.dart';
@@ -17,7 +18,8 @@ Future<void> main() async {
   Intl.defaultLocale = 'fr_FR';
   await initializeDateFormatting('fr_FR');
   final prefs = await SharedPreferences.getInstance();
-  final state = AppState(await _openStore(prefs), prefs);
+  final (store, scores) = await _openStores(prefs);
+  final state = AppState(store, prefs, scores: scores);
   runApp(GuideApp(state: state));
 }
 
@@ -27,10 +29,11 @@ const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 const _supabaseKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
 
 /// Stockage partagé Supabase si configuré, sinon stockage sur l'appareil.
-Future<AbsenceStore> _openStore(SharedPreferences prefs) async {
-  if (_supabaseUrl.isEmpty || _supabaseKey.isEmpty) return LocalAbsenceStore(prefs);
+Future<(AbsenceStore, ScoreStore)> _openStores(SharedPreferences prefs) async {
+  if (_supabaseUrl.isEmpty || _supabaseKey.isEmpty) return (LocalAbsenceStore(prefs), LocalScoreStore(prefs));
   await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseKey);
-  return SupabaseAbsenceStore(Supabase.instance.client);
+  final db = Supabase.instance.client;
+  return (SupabaseAbsenceStore(db), SupabaseScoreStore(db));
 }
 
 class GuideApp extends StatelessWidget {

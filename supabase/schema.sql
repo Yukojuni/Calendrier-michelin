@@ -43,3 +43,32 @@ begin
   alter publication supabase_realtime add table public.absences;
 exception when duplicate_object then null;
 end $$;
+
+-- Mini-jeux : meilleur score de chacun.
+create table if not exists public.scores (
+  id          text primary key,                 -- jeu_Prenom
+  game        text not null,
+  person      text not null,
+  score       integer not null check (score >= 0),
+  updated_at  timestamptz not null default now()
+);
+
+alter table public.scores enable row level security;
+
+drop policy if exists "scores lisibles" on public.scores;
+create policy "scores lisibles" on public.scores
+  for select to anon, authenticated using (true);
+
+drop policy if exists "scores ajout" on public.scores;
+create policy "scores ajout" on public.scores
+  for insert to anon, authenticated with check (true);
+
+drop policy if exists "scores modification" on public.scores;
+create policy "scores modification" on public.scores
+  for update to anon, authenticated using (true) with check (true);
+
+do $$
+begin
+  alter publication supabase_realtime add table public.scores;
+exception when duplicate_object then null;
+end $$;

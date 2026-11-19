@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../app_state.dart';
+import '../games/arcade_card.dart';
 import '../models.dart';
 import '../planning.dart';
 import '../theme.dart';
@@ -86,6 +87,8 @@ class _HomePageState extends State<HomePage> {
                               TodayHero(state: s, onMission: _goToPlanning),
                               const SizedBox(height: 20),
                               if (_quentin != null) pair(QuentinCard(state: s, info: _quentin), MePanel(state: s), fa: 16, fb: 9) else MePanel(state: s),
+                        const SizedBox(height: 20),
+                        ArcadeCard(state: s),
                               const SizedBox(height: 26),
                               _MonthHeader(state: s),
                               const SizedBox(height: 6),

@@ -6,6 +6,7 @@ une seule base de code pour le **site web** et les **apps iOS et Android**.
 Chacun choisit son nom, puis sélectionne ses journées « Entreprise » pour poser un congé
 ou du télétravail. Il y a aussi un encart « Aujourd'hui », le compte à rebours du départ de Quentin et
 un formulaire pour les longues périodes.
+Une « Salle d'arcade » propose deux mini-jeux (Attrape Quentin, Route des congés) avec un classement d'équipe.
 
 ## Lancer en local
 
@@ -21,7 +22,7 @@ Version de Flutter utilisée : **3.47.9** (stable).
 ## Base de données (Supabase)
 
 1. Créer un projet sur supabase.com.
-2. Dans **SQL Editor**, coller et lancer `supabase/schema.sql` (crée la table `absences`, ses règles et le temps réel).
+2. Dans **SQL Editor**, coller et lancer `supabase/schema.sql` (crée les tables `absences` et `scores`, leurs règles et le temps réel).
 3. Récupérer dans **Project Settings > API** l'URL du projet et la **clé publishable** (`sb_publishable_…`).
    Cette clé est faite pour être embarquée dans l'app ; ne jamais utiliser la clé *secret* / *service_role*.
 4. En local : copier `supabase.example.json` en `supabase.json` (ignoré par git), le remplir, puis

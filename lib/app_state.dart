@@ -8,10 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
 import 'planning.dart';
+import 'games/score_store.dart';
 import 'store.dart';
 
 class AppState extends ChangeNotifier {
-  AppState(this.store, this._prefs) {
+  AppState(this.store, this._prefs, {ScoreStore? scores}) : scores = scores ?? LocalScoreStore(_prefs) {
     final saved = _prefs.getString(_meKey);
     if (saved != null && kPeople.any((p) => p.name == saved)) me = saved;
     final current = today.substring(0, 7);
@@ -30,6 +31,9 @@ class AppState extends ChangeNotifier {
 
   static const _meKey = 'gdc-me';
   final AbsenceStore store;
+
+  /// Meilleurs scores des mini-jeux.
+  final ScoreStore scores;
   final SharedPreferences _prefs;
   late final StreamSubscription<Map<String, Absence>> _sub;
 
