@@ -1,6 +1,8 @@
 /// Intro façon bande-annonce, jouée au lancement de l'app.
 library;
 
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -90,15 +92,23 @@ class _IntroTrailerState extends State<IntroTrailer> with SingleTickerProviderSt
             child: Stack(fit: StackFit.expand, children: [
               Opacity(
                 opacity: image,
-                child: Transform.scale(
-                  scale: zoom,
-                  alignment: portrait ? const Alignment(.35, 0) : Alignment.center,
-                  child: Image.asset(
-                    widget.image,
-                    fit: BoxFit.cover,
-                    alignment: portrait ? const Alignment(.42, 0) : Alignment.center,
-                  ),
-                ),
+                child: portrait
+                    // Téléphone : l'image entière, sur un fond flouté de la même image.
+                    ? Stack(fit: StackFit.expand, children: [
+                        ImageFiltered(
+                          imageFilter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                          child: Image.asset(widget.image, fit: BoxFit.cover),
+                        ),
+                        ColoredBox(color: Colors.black.withValues(alpha: .35)),
+                        Transform.scale(
+                          scale: 1 + (zoom - 1) * .5,
+                          child: Image.asset(widget.image, fit: BoxFit.contain),
+                        ),
+                      ])
+                    : Transform.scale(
+                        scale: zoom,
+                        child: Image.asset(widget.image, fit: BoxFit.cover),
+                      ),
               ),
               // Voile sombre pour lire les sous-titres.
               IgnorePointer(
